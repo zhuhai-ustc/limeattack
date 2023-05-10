@@ -1,1 +1,1 @@
-python LimeAttack_classification.py  --dataset_path '/data/mr' --target_model 'wordLSTM' --sim 0
+python LimeAttack_classification.py  --dataset_path '/data/mr' --target_model 'wordLSTM'  --k 10 --syn_num 50
