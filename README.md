@@ -28,4 +28,4 @@ glove.6B.200d.txt and  counter-fitted-vectors.txt  can be obtained from  [TextFo
 - LimeAttack_nli.py: Attack the victim model for textual entailment with LimeAttack.
 
 ## run
-bash run_mr.sh
+bash attack_mr.sh
