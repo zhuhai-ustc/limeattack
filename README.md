@@ -25,7 +25,6 @@ glove.6B.200d.txt and  counter-fitted-vectors.txt  can be obtained from  [TextFo
 
 ## File Description
 - LimeAttack_classification.py: Attack the victim model for text classification with LimeAttack.
-- LimeAttack_nli.py: Attack the victim model for textual entailment with LimeAttack.
 
 ## run
 bash attack_mr.sh
