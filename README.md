@@ -13,7 +13,6 @@ LimeAttack's code:
 - numpy == 1.23.2
 - nltk == 3.7
 - scipy == 1.9.1
-- pattern==3.6
 
 
 
