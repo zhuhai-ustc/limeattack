@@ -2,6 +2,7 @@ LimeAttack's code:
 
 ## Requirements
 
+- py3.10
 - boto3==1.26.28
 - botocore==1.29.28
 - torch == 1.12.1+cu116
