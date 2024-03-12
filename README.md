@@ -8,8 +8,8 @@ LimeAttack's code:
 - boto3==1.26.28
 - botocore==1.29.28
 - torch == 1.12.1+cu116
-- tensorflow-gpu == 2.11.0
-- tensorflow-hub == 0.12.0
+- tensorflow-gpu == 2.11.0（optional）
+- tensorflow-hub == 0.12.0（optional）
 - numpy == 1.23.2
 - nltk == 3.7
 - scipy == 1.9.1
