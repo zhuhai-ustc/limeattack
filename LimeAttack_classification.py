@@ -7,7 +7,7 @@ import criteria
 import torch
 import torch.nn as nn
 from train_classifier import Model,NLI_infer_BERT
-from generate_embedding_mat import generate_embedding_mat
+from generate_embedding_mat import generate_embedding_mat,csim_matrix
 import datetime
 import tqdm
 from lime.lime_text import LimeTextExplainer
@@ -73,37 +73,6 @@ def pick_most_similar_words_batch(src_words, sim_mat, idx2word, ret_count=10, th
         sim_words.append(sim_word)
         sim_values.append(sim_value)
     return sim_words, sim_values
-
-
-def csim_matrix(lst_revs ,embeddings, word2idx_vocab):
-    ''' Create a cosine similarity matrix only for words in reviews
-
-    Identify all the words in the reviews that are not stop words
-    Use embedding matrix to create a cosine similarity submatrix just for these words
-    Columns of this cosine similarity matrix correspond to the original words in the embedding
-    rows of the matrix correspond to the words in the reviews
-    '''
-    reviews = [d[0] for d in lst_revs]
-    all_words = set()
-
-    for r in reviews:
-        all_words = all_words.union(set([str(word) for word in r if str(word) in word2idx_vocab and str(word) not in criteria.filter_words]))
-
-    word2idx_rev={}
-    idx2word_rev={}
-    p=0
-    embeddings_rev_words=[]
-    for word in all_words:
-        word2idx_rev[str(word)] = p
-        idx2word_rev[p]=str(word)
-        p+=1
-        embeddings_rev_words.append(embeddings[word2idx_vocab[str(word)]])
-
-    embeddings_rev_words=np.array(embeddings_rev_words)
-    cos_sim = np.dot(embeddings_rev_words, embeddings.T)
-
-    return cos_sim, word2idx_rev,idx2word_rev
-
 
 
 
@@ -184,6 +153,7 @@ def attack(text_id,fail,text_ls,true_label,predictor,lime_pred,stop_word_set,wor
         return  [2, orig_label, 0]
     else:
         import_scores,lime_word = lime_word_ranking(text_ls,lime_pred,orig_label.item())
+        #num_queries+=query
         words_perturb = []
         for idx, score in sorted(enumerate(import_scores), key=lambda x: x[1], reverse=True):
             if score > import_score_threshold and text_ls[idx] not in stop_word_set:
@@ -287,12 +257,12 @@ def run_attack():
 
     parser.add_argument("--word_embeddings_path",
                         type=str,
-                        default='/data/embedding/glove.6B.200d.txt',
+                        default='/mnt/d2/sxy2/TextHacker/data/embedding/glove.6B.200d.txt',
                         help="path to the word embeddings for the target model, CNN and LSTM is need")
     parser.add_argument("--counter_fitting_embeddings_path",
                         type=str,
                         required=False,
-                        default="/data/counter-fitted-vectors.txt",
+                        default="/mnt/d2/sxy2/TextHacker/data/aux_files/counter-fitted-vectors.txt",
                         help="path to the counter-fitting embeddings used to find synonyms")
 
     parser.add_argument("--sim",
@@ -329,8 +299,8 @@ def run_attack():
     embeddings, word2idx_vocab, idx2word_vocab = generate_embedding_mat(args.counter_fitting_embeddings_path)
     cos_sim, word2idx_rev, idx2word_rev = csim_matrix(data, embeddings, word2idx_vocab)
     # Load the saved model usin state dic
-    default_model_path = "/model/"
     if args.target_model == "wordCNN":
+        default_model_path = "/mnt/d2/sxy2/TextHacker/data/model/"
         if 'ag' in args.dataset_path:
             default_model_path = os.path.join(default_model_path,args.model_path)
             args.nclasses = 4
@@ -349,6 +319,7 @@ def run_attack():
             model.load_state_dict(checkpoint)
 
     elif args.target_model == "wordLSTM":
+        default_model_path = "/model/"
         if 'ag' in args.dataset_path:
             default_model_path = os.path.join(default_model_path,args.model_path)
             args.nclasses = 4
@@ -361,6 +332,8 @@ def run_attack():
         checkpoint = torch.load(default_model_path, map_location='cuda:0')
         model.load_state_dict(checkpoint)
     elif args.target_model == "bert":
+        #default_model_path = "/model/"
+        default_model_path = "/mnt/d2/sxy2/TextHacker/data/model/bert/mr/mr_example/checkpoint-epoch-1"
         if 'ag' in args.dataset_path:
             default_model_path = os.path.join(default_model_path,args.model_path)
             args.nclasses = 4
